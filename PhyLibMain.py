@@ -2,8 +2,19 @@
 from Tkinter import *
 
 def login(user,password):
-    print "click!"
-    return
+    # Bring up the user book checkout / in screen
+    pass
+
+def user_home(user):
+    # List the books the user has checked out
+    # Mention that they only have to scan a book for autocheckout / in
+    # Add a button for when they are done
+
+    # If the user is a librarian
+    #  add a buton for adding a book
+    #  another for removing a book
+    #  and a final one for adding a user
+    pass
 
 def makeentry(parent, caption, width=None, **options):
     Label(parent, text=caption).pack(side=LEFT)
