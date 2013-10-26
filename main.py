@@ -3,7 +3,7 @@ from time import time
 from kivy.app import App
 from os.path import dirname, join
 from kivy.lang import Builder
-from kivy.properties import NumericProperty, StringProperty, BooleanProperty
+from kivy.properties import NumericProperty, StringProperty, BooleanProperty, ObjectProperty
 from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.uix.screenmanager import Screen
@@ -13,11 +13,13 @@ from kivy.uix.textinput import TextInput
 
 class LibraryScreen(Screen):
     fullscreen = BooleanProperty(False)
+
     def add_widget(self, *args):
         if 'content' in self.ids:
             return self.ids.content.add_widget(*args)
         return super(LibraryScreen, self).add_widget(*args)
 
+# This allows us to tab from one text field to the next
 class TabTextInput(TextInput):
 
     def __init__(self, *args, **kwargs):
@@ -42,29 +44,23 @@ class LibraryApp(App):
     time = NumericProperty(0)
     show_sourcecode = BooleanProperty(False)
     sourcecode = StringProperty()
+    username_box = ObjectProperty()
+    password_box = ObjectProperty()
 
     def build(self):
         Clock.schedule_interval(self._update_clock, 1 / 60.)
         self.screens = {}
         self.available_screens = [
-            'login', 'buttons']
+            'login', 'user', 'librarian']
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
-        self.go_next_screen()
+        self.go_screen(0,'left')
 
-    def go_previous_screen(self):
-        self.index = (self.index - 1) % len(self.available_screens)
-        screen = self.load_screen(self.index)
+    def go_screen(self,screen_index,direction):
+        screen = self.load_screen(screen_index)
         sm = self.root.ids.sm
-        sm.switch_to(screen, direction='right')
-        self.current_title = screen.name
-
-    def go_next_screen(self):
-        self.index = (self.index + 1) % len(self.available_screens)
-        screen = self.load_screen(self.index)
-        sm = self.root.ids.sm
-        sm.switch_to(screen, direction='left')
+        sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
 
     def load_screen(self, index):
@@ -73,6 +69,24 @@ class LibraryApp(App):
         screen = Builder.load_file(self.available_screens[index])
         self.screens[index] = screen
         return screen
+
+    def login(self):
+        # Get the text box contents and pass them to
+        #    our authentication agent.
+        # Check to see if the user is a librarian
+        # If they are then give them that screen
+        #print(self.username_box.text)
+        #if self.username_box.text == 'kec30':
+        self.go_screen(2,'left')
+        # otherwise they get the standard user screen
+        #else:
+        #    self.go_screen(1,'left')
+        return
+
+    def logout(self):
+        # Return us to the login screen
+        self.go_screen(0,'right')
+        return
 
     def _update_clock(self, dt):
         self.time = time()

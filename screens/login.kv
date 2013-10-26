@@ -1,5 +1,7 @@
 LibraryScreen:
     name: 'mainlogin'
+    username_box: username_text
+    password_box: password_text
 
     Label:
         text: 'Login to begin'
@@ -17,23 +19,23 @@ LibraryScreen:
             text: 'Username'
 
         TabTextInput:
-            id: un
+            id: username_text
             size_hint_y: None
             height: '32dp'
             text: ''
             focus: True
-            next: pw
+            next: password_text
 
         Label:
             text: 'Password'
 
         TabTextInput:
-            id: pw
+            id: password_text
             size_hint_y: None
             height: '32dp'
             text: ''
             password: True
-            next: un
+            next: username_text
 
     Button:
         size_hint_y: None

@@ -1,0 +1,39 @@
+LibraryScreen:
+	name: 'librarian'
+    fullscreen: True
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 1
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                size_hint_y: .1
+                text: 'User: Items currently checked out:'
+
+            Label:
+                size_hint_y: .9
+                text: 'No items currently checked out.'
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                size_hint_y: .7
+                text: ''
+
+            Label:
+                size_hint_y: .1
+                text: 'User options:'
+
+            Button:
+                size_hint_y: .1
+                text: 'Logout'
+                on_release: app.logout()
+
+            Label:
+                size_hint_y: .1
+                text: ''
+
