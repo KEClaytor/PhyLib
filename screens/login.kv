@@ -1,0 +1,42 @@
+LibraryScreen:
+    name: 'mainlogin'
+
+    Label:
+        text: 'Login to begin'
+
+    Label:
+        text: ''
+
+    GridLayout:
+        cols: 2
+        spacing: '8dp'
+        size_hint_y: None
+        height: self.minimum_height
+
+        Label:
+            text: 'Username'
+
+        TabTextInput:
+            id: un
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            focus: True
+            next: pw
+
+        Label:
+            text: 'Password'
+
+        TabTextInput:
+            id: pw
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            password: True
+            next: un
+
+    Button:
+        size_hint_y: None
+        height: '48dp'
+        text: 'Login'
+        on_release: app.login()
