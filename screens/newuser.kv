@@ -1,0 +1,60 @@
+LibraryScreen:
+    name: 'mainlogin'
+
+    Label:
+        text: 'Welcome to the Physics Library System'
+
+    Label:
+        text: 'I''ll need a little bit of data to get going'
+
+    GridLayout:
+        cols: 2
+        spacing: '8dp'
+        size_hint_y: None
+        height: self.minimum_height
+
+        Label:
+            text: 'Name'
+
+        TabTextInput:
+            id: new_name_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            focus: True
+            next: new_username_text
+
+        Label:
+            text: 'NetID'
+
+        TabTextInput:
+            id: new_username_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            next: new_password_text
+
+        Label:
+            text: 'Password'
+
+        TabTextInput:
+            id: new_password_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            password: True
+            next: create_button
+
+    Button:
+        id: create_button
+        size_hint_y: None
+        height: '48dp'
+        text: 'Create User'
+        on_release: app.add_user(True)
+
+    Button:
+        id: cancel_button
+        size_hint_y: None
+        height: '48dp'
+        text: 'Cancel and Return'
+        on_release: app.add_user(False)

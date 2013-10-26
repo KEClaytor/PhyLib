@@ -49,7 +49,7 @@ class LibraryApp(App):
         Clock.schedule_interval(self._update_clock, 1 / 60.)
         self.screens = {}
         self.available_screens = [
-            'login', 'user', 'librarian']
+            'login', 'user', 'librarian', 'newuser', 'newbook']
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
@@ -62,6 +62,12 @@ class LibraryApp(App):
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
         return
+    def go_add_user_screen(self):
+        self.go_screen(3,'left')
+        return
+    def go_add_book_screen(self):
+        self.go_screen(4,'left')
+        return
 
     def load_screen(self, index):
         if index in self.screens:
@@ -69,15 +75,6 @@ class LibraryApp(App):
         screen = Builder.load_file(self.available_screens[index])
         self.screens[index] = screen
         return screen
-
-    # This is a kinda hokey way of doing it
-    #  but it quickly gets the text from the textboxes
-    def update_username(self,username):
-        self.username = username
-        return
-    def update_password(self,password):
-        self.password = password
-        return
 
     def login(self):
         # Get the text box contents and pass them to
@@ -103,6 +100,20 @@ class LibraryApp(App):
         # Clear username and password
         self.screens[0].ids.username_text.text = ''
         self.screens[0].ids.password_text.text = ''
+        return
+
+    # Librarian screens, creating users and books
+    def add_user(self,create):
+        if create:
+            pass
+        else:
+            self.go_screen(2,'right')
+        return
+    def add_book(self,create):
+        if create:
+            pass
+        else:
+            self.go_screen(2,'right')
         return
 
     def _update_clock(self, dt):

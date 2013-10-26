@@ -1,0 +1,70 @@
+LibraryScreen:
+    name: 'mainlogin'
+
+    Label:
+        text: 'Welcome to the Physics Library System'
+
+    Label:
+        text: 'Enter the information below to add a book to the sytem.'
+
+    GridLayout:
+        cols: 2
+        spacing: '8dp'
+        size_hint_y: None
+        height: self.minimum_height
+
+        Label:
+            text: 'Title'
+
+        TabTextInput:
+            id: new_title_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            focus: True
+            next: new_author_text
+
+        Label:
+            text: 'Author'
+
+        TabTextInput:
+            id: new_author_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            next: new_year_text
+
+        Label:
+            text: 'Year'
+
+        TabTextInput:
+            id: new_year_text
+            size_hint_y: None
+            height: '32dp'
+            text: ''
+            readonly: True
+            next: new_rfid_text
+
+        Label:
+            text: 'RFID Code'
+
+        Button:
+            id: new_rfid_button
+            size_hint_y: None
+            height: '48dp'
+            text: 'Scan for RFID Code'
+            on_release: app.add_book_code()
+
+    Button:
+        id: create_button
+        size_hint_y: None
+        height: '48dp'
+        text: 'Create User'
+        on_release: app.add_book(True)
+
+    Button:
+        id: cancel_button
+        size_hint_y: None
+        height: '48dp'
+        text: 'Cancel and Return'
+        on_release: app.add_book(False)
