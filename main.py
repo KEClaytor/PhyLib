@@ -44,8 +44,6 @@ class LibraryApp(App):
     time = NumericProperty(0)
     show_sourcecode = BooleanProperty(False)
     sourcecode = StringProperty()
-    username_box = ObjectProperty()
-    password_box = ObjectProperty()
 
     def build(self):
         Clock.schedule_interval(self._update_clock, 1 / 60.)
@@ -56,12 +54,14 @@ class LibraryApp(App):
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
         self.go_screen(0,'left')
+        return
 
     def go_screen(self,screen_index,direction):
         screen = self.load_screen(screen_index)
         sm = self.root.ids.sm
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
+        return
 
     def load_screen(self, index):
         if index in self.screens:
@@ -70,22 +70,39 @@ class LibraryApp(App):
         self.screens[index] = screen
         return screen
 
+    # This is a kinda hokey way of doing it
+    #  but it quickly gets the text from the textboxes
+    def update_username(self,username):
+        self.username = username
+        return
+    def update_password(self,password):
+        self.password = password
+        return
+
     def login(self):
         # Get the text box contents and pass them to
         #    our authentication agent.
         # Check to see if the user is a librarian
         # If they are then give them that screen
-        #print(self.username_box.text)
-        #if self.username_box.text == 'kec30':
-        self.go_screen(2,'left')
-        # otherwise they get the standard user screen
-        #else:
-        #    self.go_screen(1,'left')
+        username = self.screens[0].ids.username_text.text
+        password = self.screens[0].ids.password_text.text
+        # TODO: Get user info
+        #(user,lib) = get_user_info(self.username)
+        lib = 0
+        if (username == 'kec30'):
+            lib = 1
+        if (lib):
+            self.go_screen(2,'left')
+        else:
+            self.go_screen(1,'left')
         return
 
     def logout(self):
         # Return us to the login screen
         self.go_screen(0,'right')
+        # Clear username and password
+        self.screens[0].ids.username_text.text = ''
+        self.screens[0].ids.password_text.text = ''
         return
 
     def _update_clock(self, dt):
