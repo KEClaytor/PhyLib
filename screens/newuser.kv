@@ -34,18 +34,17 @@ LibraryScreen:
             size_hint_y: None
             height: '32dp'
             text: ''
-            next: new_password_text
+            next: new_name_text
 
         Label:
-            text: 'Password'
+            text: 'Status:'
 
-        TabTextInput:
-            id: new_password_text
+        TextInput:
+            id: newuser_status_text
+            readonly: True
             size_hint_y: None
             height: '32dp'
-            text: ''
-            password: True
-            next: create_button
+            text: 'Pending...'
 
     Button:
         id: create_button

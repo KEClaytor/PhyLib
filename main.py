@@ -14,6 +14,8 @@ from kivy.uix.textinput import TextInput
 import pickle
 import user
 import book
+# TODO: Create a call that will allow us to easially get/set
+#       text from text boxes.
 
 class LibraryScreen(Screen):
     # TODO: When done make this fullscreen
@@ -49,21 +51,44 @@ class LibraryApp(App):
     current_title = StringProperty()
     time = NumericProperty(0)
 
-    # On initalization try to load the pickled users and books
-    # These should always work since we open them for writing
-    file_books = open('librarybooks.pld','rw')
-    file_users = open('libraryusers.pld','rw')
-    # But they may not have anything in them yet
+    # Try opening for reading.
+    # If no file exists, then we can make a new one
+    filename_users = 'libraryusers.pld'
+    #filename_books = 'librarybooks.pld'
+#    try:
+#        file_books = open(filename_books, 'r')
+#        try:
+#            data_books = pickle.load( file_books )
+#            file_books.close()
+#            print "Loaded Book data file"
+#            print data_books
+#        except EOFError:
+#            data_books = {}
+#            print "Creating Book data"
+#            print data_books
+#    except IOError:
+#        data_books = {}
+#        print "Creating Book data"
+#        print data_books
+    # Now for the user file
     try:
-        data_books = pickle.load( file_books )
-    except EOFError:
-        data_books = {}
-    try:
-        data_users = pickle.load( file_users )
-    except EOFError:
+        file_users = open(filename_users, 'r')
+        try:
+            data_users = pickle.load( file_users )
+            file_users.close()
+            print "Loaded user data file"
+            print data_users
+        except EOFError:
+            data_users = {}
+            print "File found, unable to load, creating new suers"
+            print data_users
+    except IOError:
         data_users = {}
+        print "File not found, Creating User data"
+        print data_users
 
     def build(self):
+        # Initalize screen info
         Clock.schedule_interval(self._update_clock, 1 / 60.)
         self.screens = {}
         self.available_screens = ['login', 'user',
@@ -86,7 +111,7 @@ class LibraryApp(App):
         self.go_screen(self.sidx['newuser'],'left')
         return
     def go_add_book_screen(self):
-        self.go_screen(self.sidx['newbookx'],'left')
+        self.go_screen(self.sidx['newbook'],'left')
         return
 
     def load_screen(self, index):
@@ -101,8 +126,8 @@ class LibraryApp(App):
         #    our authentication agent.
         # Check to see if the user is a librarian
         # If they are then give them that screen
-        username = self.screens[0].ids.username_text.text
-        password = self.screens[0].ids.password_text.text
+        username = self.screens[self.sidx['login']].ids.username_text.text
+        password = self.screens[self.sidx['login']].ids.password_text.text
         # TODO: Get user info
         #lib = self.get_login_info(username)
         lib = 0
@@ -125,18 +150,28 @@ class LibraryApp(App):
     # Librarian screens, creating users and books
     def add_user(self,create):
         if create:
-            # Create a new user with the provided values
-            names = self.screens[self.sidx['newuser']].ids.new_name_text
-            netid = self.screens[self.sidx['newuser']].ids.new_netid_text
-            newuser = user.user(name=names,netid=netid)
-            data_users[netid] = newuser
-            # Re-pickle our data
-            pickle.dump(data_users, file_users)
+            try:
+                # Create a new user with the provided values
+                names = self.screens[self.sidx['newuser']].ids.new_name_text.text
+                netid = self.screens[self.sidx['newuser']].ids.new_netid_text.text
+                newuser = user.user(name=names,netid=netid)
+                self.data_users[netid] = newuser
+                # Re-pickle our data
+                file_users = open(self.filename_users,'w')
+                pickle.dump(self.data_users, file_users)
+                file_users.close()
+                # Reset text and let the user know this worked
+                self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
+                self.screens[self.sidx['newuser']].ids.new_netid_text.text = ''
+                self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
+            except:
+                self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Create Failed!'
         else:
             self.go_screen(self.sidx['librarian'],'right')
         return
     def add_book(self,create):
         if create:
+            pass
             # Create a new user with the provided values
             # Re-pickle our data
         else:
