@@ -3,9 +3,11 @@ LibraryScreen:
 
     Label:
         text: 'Welcome to the Physics Library System'
+        size_hint_y: '12dp'
 
     Label:
-        text: 'I''ll need a little bit of data to get going'
+        text: "I'll need a little bit of data to get going"
+        size_hint_y: None
 
     GridLayout:
         cols: 2
@@ -28,7 +30,7 @@ LibraryScreen:
             text: 'NetID'
 
         TabTextInput:
-            id: new_username_text
+            id: new_netid_text
             size_hint_y: None
             height: '32dp'
             text: ''

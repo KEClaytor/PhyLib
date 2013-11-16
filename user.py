@@ -1,6 +1,6 @@
 # The user data type and associated methods
 
-class Member():
+class user():
     def __init__(self, name, netid):
         self.name = name
         self.netid = netid
@@ -25,6 +25,9 @@ class Member():
     def make_librarian(self):
         self.librarian = 1
         return
+    def remove_librarian(self):
+        self.librarian = 1
+        return
 
     # Checking out and in books
     def checkout(self, book_id):
@@ -36,4 +39,5 @@ class Member():
         book_idx = self.books.index(book_id)
         self.books.pop(book_idx)
         self.times.pop(book_idx)
-    return
+        return
+

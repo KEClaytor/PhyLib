@@ -42,8 +42,6 @@ LibraryScreen:
             size_hint_y: None
             height: '32dp'
             text: ''
-            readonly: True
-            next: new_rfid_text
 
         Label:
             text: 'RFID Code'
@@ -59,7 +57,7 @@ LibraryScreen:
         id: create_button
         size_hint_y: None
         height: '48dp'
-        text: 'Create User'
+        text: 'Add Book'
         on_release: app.add_book(True)
 
     Button:

@@ -14,6 +14,8 @@ from kivy.uix.textinput import TextInput
 import pickle
 
 class LibraryScreen(Screen):
+    # TODO: When done make this fullscreen
+    # TODO: Remap escape to go back a screen
     fullscreen = BooleanProperty(False)
 
     def add_widget(self, *args):
@@ -47,13 +49,15 @@ class LibraryApp(App):
 
     # On initalization try to load the pickled users and books
     try:
-        data_books = pickle.load( open('librarybooks.pld','rw') )
+        book_file = open('librarybooks.pld','rw')
+        data_books = pickle.load( user_file )
     except IOError:
-        data_books = []
+        data_books = {}
     try:
-        data_users = pickle.load( open('libraryusers.pld','rw') )
+        user_file = open('libraryusers.pld','rw')
+        data_users = pickle.load( user_file )
     except IOError:
-        data_users = []
+        data_users = {}
 
     def build(self):
         Clock.schedule_interval(self._update_clock, 1 / 60.)
@@ -61,7 +65,7 @@ class LibraryApp(App):
         self.available_screens = ['login', 'user',
             'librarian', 'newuser', 'newbook']
         self.sidx = {'login':0, 'user':1,
-            'librarian':2, 'newuser':3, 'newbook':4]
+            'librarian':2, 'newuser':3, 'newbook':4}
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
@@ -96,7 +100,7 @@ class LibraryApp(App):
         username = self.screens[0].ids.username_text.text
         password = self.screens[0].ids.password_text.text
         # TODO: Get user info
-        lib = get_login_info(username)
+        #lib = self.get_login_info(username)
         lib = 0
         if (username == 'kec30'):
             lib = 1
@@ -118,12 +122,21 @@ class LibraryApp(App):
     def add_user(self,create):
         if create:
             pass
+            # Create a new user with the provided values
+            names = self.screens[0].ids.new_name_text
+            netid = self.screens[0].ids.new_netid_text
+            newuser = user.user(name=names,netid=netid)
+            data_users[netid] = newuser
+            # Re-pickle our data
+            pickle()
         else:
             self.go_screen(self.sidx['librarian'],'right')
         return
     def add_book(self,create):
         if create:
             pass
+            # Create a new book with the provided values
+            # Re-pickle our data
         else:
             self.go_screen(self.sidx['librarian'],'right')
         return
