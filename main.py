@@ -10,6 +10,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.core.window import Window
 # For the custom textinput class
 from kivy.uix.textinput import TextInput
+# Library needed modules
+import pickle
 
 class LibraryScreen(Screen):
     fullscreen = BooleanProperty(False)
@@ -42,18 +44,28 @@ class LibraryApp(App):
     index = NumericProperty(-1)
     current_title = StringProperty()
     time = NumericProperty(0)
-    show_sourcecode = BooleanProperty(False)
-    sourcecode = StringProperty()
+
+    # On initalization try to load the pickled users and books
+    try:
+        data_books = pickle.load( open('librarybooks.pld','rw') )
+    except IOError:
+        data_books = []
+    try:
+        data_users = pickle.load( open('libraryusers.pld','rw') )
+    except IOError:
+        data_users = []
 
     def build(self):
         Clock.schedule_interval(self._update_clock, 1 / 60.)
         self.screens = {}
-        self.available_screens = [
-            'login', 'user', 'librarian', 'newuser', 'newbook']
+        self.available_screens = ['login', 'user',
+            'librarian', 'newuser', 'newbook']
+        self.sidx = {'login':0, 'user':1,
+            'librarian':2, 'newuser':3, 'newbook':4]
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
-        self.go_screen(0,'left')
+        self.go_screen(self.sidx['login'],'left')
         return
 
     def go_screen(self,screen_index,direction):
@@ -63,10 +75,10 @@ class LibraryApp(App):
         self.current_title = screen.name
         return
     def go_add_user_screen(self):
-        self.go_screen(3,'left')
+        self.go_screen(self.sidx['newuser'],'left')
         return
     def go_add_book_screen(self):
-        self.go_screen(4,'left')
+        self.go_screen(self.sidx['newbookx'],'left')
         return
 
     def load_screen(self, index):
@@ -84,22 +96,22 @@ class LibraryApp(App):
         username = self.screens[0].ids.username_text.text
         password = self.screens[0].ids.password_text.text
         # TODO: Get user info
-        #(user,lib) = get_user_info(self.username)
+        lib = get_login_info(username)
         lib = 0
         if (username == 'kec30'):
             lib = 1
         if (lib):
-            self.go_screen(2,'left')
+            self.go_screen(self.sidx['librarian'],'left')
         else:
-            self.go_screen(1,'left')
+            self.go_screen(self.sidx['user'],'left')
         return
 
     def logout(self):
         # Return us to the login screen
         self.go_screen(0,'right')
         # Clear username and password
-        self.screens[0].ids.username_text.text = ''
-        self.screens[0].ids.password_text.text = ''
+        self.screens[self.sidx['login']].ids.username_text.text = ''
+        self.screens[self.sidx['login']].ids.password_text.text = ''
         return
 
     # Librarian screens, creating users and books
@@ -107,13 +119,13 @@ class LibraryApp(App):
         if create:
             pass
         else:
-            self.go_screen(2,'right')
+            self.go_screen(self.sidx['librarian'],'right')
         return
     def add_book(self,create):
         if create:
             pass
         else:
-            self.go_screen(2,'right')
+            self.go_screen(self.sidx['librarian'],'right')
         return
 
     def _update_clock(self, dt):
