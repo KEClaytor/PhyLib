@@ -20,3 +20,4 @@ class Book():
     def change_id(self, new_id):
         self.book_id = new_id
         return
+

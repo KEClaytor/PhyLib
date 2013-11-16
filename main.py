@@ -12,6 +12,8 @@ from kivy.core.window import Window
 from kivy.uix.textinput import TextInput
 # Library needed modules
 import pickle
+import user
+import book
 
 class LibraryScreen(Screen):
     # TODO: When done make this fullscreen
@@ -48,15 +50,17 @@ class LibraryApp(App):
     time = NumericProperty(0)
 
     # On initalization try to load the pickled users and books
+    # These should always work since we open them for writing
+    file_books = open('librarybooks.pld','rw')
+    file_users = open('libraryusers.pld','rw')
+    # But they may not have anything in them yet
     try:
-        book_file = open('librarybooks.pld','rw')
-        data_books = pickle.load( user_file )
-    except IOError:
+        data_books = pickle.load( file_books )
+    except EOFError:
         data_books = {}
     try:
-        user_file = open('libraryusers.pld','rw')
-        data_users = pickle.load( user_file )
-    except IOError:
+        data_users = pickle.load( file_users )
+    except EOFError:
         data_users = {}
 
     def build(self):
@@ -121,25 +125,28 @@ class LibraryApp(App):
     # Librarian screens, creating users and books
     def add_user(self,create):
         if create:
-            pass
             # Create a new user with the provided values
-            names = self.screens[0].ids.new_name_text
-            netid = self.screens[0].ids.new_netid_text
+            names = self.screens[self.sidx['newuser']].ids.new_name_text
+            netid = self.screens[self.sidx['newuser']].ids.new_netid_text
             newuser = user.user(name=names,netid=netid)
             data_users[netid] = newuser
             # Re-pickle our data
-            pickle()
+            pickle.dump(data_users, file_users)
         else:
             self.go_screen(self.sidx['librarian'],'right')
         return
     def add_book(self,create):
         if create:
-            pass
-            # Create a new book with the provided values
+            # Create a new user with the provided values
             # Re-pickle our data
         else:
             self.go_screen(self.sidx['librarian'],'right')
         return
+    # TODO: May just put these on a screen of their own
+    def list_all_users(self):
+        pass
+    def list_all_books(self):
+        pass
 
     def _update_clock(self, dt):
         self.time = time()
