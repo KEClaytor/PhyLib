@@ -108,11 +108,17 @@ class LibraryApp(App):
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
         return
-    # TODO: Create a call that will allow us to easially get/set
-    #       text from text boxes. aka, get this function working.
-    def get_field(self,screen_name,field_name):
-        text = self.screens[self.sidx[screen_name]].ids.field_name.text
-        return text
+    # Should allow for easier / clearer get/set from textboxes
+    #   elem_name is the kivy id, eg. 'newbook_title_text'
+    #   and field_name is what you want, eg; 'text'
+    # This allows it to be somewhat more general too
+    def get_kvattr(self, screen_name, elem_name, field_name):
+        ids = self.screens[self.sidx[screen_name]].ids
+        return getattr( getattr(ids, elem_name), field_name )
+    def set_kvattr(self, screen_name, elem_name, field_name, new_data):
+        ids = self.screens[self.sidx[screen_name]].ids
+        setattr( getattr( getattr(ids,elem_name), field_name), new_data )
+        return
 
     def load_screen(self, index):
         if index in self.screens:
@@ -126,8 +132,8 @@ class LibraryApp(App):
         #    our authentication agent.
         # Check to see if the user is a librarian
         # If they are then give them that screen
-        username = self.screens[self.sidx['login']].ids.username_text.text
-        password = self.screens[self.sidx['login']].ids.password_text.text
+        username = self.get_kvattr('login', 'username_text', 'text')
+        password = self.get_kvattr('login', 'password_text', 'text')
         # TODO: Get user info
         #lib = self.get_login_info(username)
         lib = 0
@@ -149,20 +155,23 @@ class LibraryApp(App):
 
     # Librarian screens, creating users and books
     def add_user(self,create):
-        self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,1,1,1]
+        #self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,1,1,1]
+        self.set_kvattr('newuser','newuser_status_text','background_color',[1,1,1,1])
         if create:
             try:
                 # Create a new user with the provided values
-                names = self.screens[self.sidx['newuser']].ids.new_name_text.text
-                netid = self.screens[self.sidx['newuser']].ids.new_netid_text.text
+                names = self.get_kvattr('newuser','newuser_name_text','text')
+                netid = self.get_kvattr('newuser','newuser_netid_text','text')
                 newuser = user.User(names, netid)
                 self.data_users[netid] = newuser
                 # Re-pickle our data
                 file_users = open(self.filename_users,'w')
                 pickle.dump(self.data_users, file_users)
                 file_users.close()
-                self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
-                self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [0,1,0,1]
+                self.set_kvattr('newuser','newuser_status_text','text','Success!')
+                self.set_kvattr('newuser','newuser_status_text','background_color',[0,1,0,1])
+                #self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
+                #self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [0,1,0,1]
             except:
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Create Failed!'
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,0,0,1]
@@ -184,6 +193,7 @@ class LibraryApp(App):
                 year = self.screens[self.sidx['newbook']].ids.newbook_year_text.text
                 copy = self.screens[self.sidx['newbook']].ids.newbook_copy_text.text
                 self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Awaiting RFID Code....'
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,0.7,0,1]
                 #TODO: get a real RFID code here
                 rfidcode = rfid.get_rfid()
                 self.screens[self.sidx['newbook']].ids.newbook_rfid_text.text = str(rfidcode)
