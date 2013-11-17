@@ -93,12 +93,18 @@ class LibraryApp(App):
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
-        self.go_screen('login','left')
+        self.go_screen('login')
         return
 
-    def go_screen(self,screen_name,direction):
+    def go_screen(self,screen_name):
+        old_idx = self.index
+        self.index = self.sidx[screen_name]
         screen = self.load_screen(self.sidx[screen_name])
         sm = self.root.ids.sm
+        if self.index > old_idx:
+            direction = 'left'
+        else:
+            direction = 'right'
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
         return
@@ -128,14 +134,14 @@ class LibraryApp(App):
         if (username == 'kec30'):
             lib = 1
         if (lib):
-            self.go_screen('librarian','left')
+            self.go_screen('librarian')
         else:
-            self.go_screen('user','left')
+            self.go_screen('user')
         return
 
     def logout(self):
         # Return us to the login screen
-        self.go_screen('login','right')
+        self.go_screen('login')
         # Clear username and password
         self.screens[self.sidx['login']].ids.username_text.text = ''
         self.screens[self.sidx['login']].ids.password_text.text = ''
@@ -164,7 +170,7 @@ class LibraryApp(App):
             # Reset text and let the user know this worked
             self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
             self.screens[self.sidx['newuser']].ids.new_netid_text.text = ''
-            self.go_screen('librarian','right')
+            self.go_screen('librarian')
         return
     def add_book(self,create):
         # Set background color on status back to white
@@ -198,7 +204,7 @@ class LibraryApp(App):
             self.screens[self.sidx['newbook']].ids.newbook_author_text.text = ''
             self.screens[self.sidx['newbook']].ids.newbook_year_text.text = ''
             self.screens[self.sidx['newbook']].ids.newbook_copy_text.text = '1'
-            self.go_screen('librarian','right')
+            self.go_screen('librarian')
         return
 
     # TODO: May just put these on a screen of their own
