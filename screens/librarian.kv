@@ -26,8 +26,8 @@ LibraryScreen:
 
             Button:
                 size_hint_y: .1
-                text: 'Add User'
-                on_release: app.go_add_user_screen()
+                text: 'User Management'
+                on_release: app.go_screen('newuser','left')
 
             Label:
                 size_hint_y: .1
@@ -35,8 +35,8 @@ LibraryScreen:
 
             Button:
                 size_hint_y: .1
-                text: 'Add Book'
-                on_release: app.go_add_book_screen()
+                text: 'Book Management'
+                on_release: app.go_screen('newbook','left')
 
             Label:
                 size_hint_y: .3

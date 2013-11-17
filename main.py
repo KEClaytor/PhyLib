@@ -15,8 +15,6 @@ import pickle
 import user
 import book
 import rfid
-# TODO: Create a call that will allow us to easially get/set
-#       text from text boxes.
 
 class LibraryScreen(Screen):
     # TODO: When done make this fullscreen
@@ -104,12 +102,11 @@ class LibraryApp(App):
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
         return
-    def go_add_user_screen(self):
-        self.go_screen('newuser','left')
-        return
-    def go_add_book_screen(self):
-        self.go_screen('newbook','left')
-        return
+    # TODO: Create a call that will allow us to easially get/set
+    #       text from text boxes. aka, get this function working.
+    def get_field(self,screen_name,field_name):
+        text = self.screens[self.sidx[screen_name]].ids.field_name.text
+        return text
 
     def load_screen(self, index):
         if index in self.screens:
@@ -146,6 +143,7 @@ class LibraryApp(App):
 
     # Librarian screens, creating users and books
     def add_user(self,create):
+        self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,1,1,1]
         if create:
             try:
                 # Create a new user with the provided values
@@ -158,8 +156,10 @@ class LibraryApp(App):
                 pickle.dump(self.data_users, file_users)
                 file_users.close()
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
+                self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [0,1,0,1]
             except:
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Create Failed!'
+                self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,0,0,1]
         else:
             # Reset text and let the user know this worked
             self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
@@ -167,6 +167,8 @@ class LibraryApp(App):
             self.go_screen('librarian','right')
         return
     def add_book(self,create):
+        # Set background color on status back to white
+        self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,1,1,1]
         if create:
             try:
                 # Create a new book with the provided values
@@ -186,8 +188,10 @@ class LibraryApp(App):
                 pickle.dump(self.data_books, file_books)
                 file_books.close()
                 self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Success!'
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [0,1,0,1]
             except:
                 self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Create Failed!'
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,0,0,1]
         else:
             # Reset text and let the user know this worked
             self.screens[self.sidx['newbook']].ids.newbook_title_text.text = ''
