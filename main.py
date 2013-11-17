@@ -14,6 +14,7 @@ from kivy.uix.textinput import TextInput
 import pickle
 import user
 import book
+import rfid
 # TODO: Create a call that will allow us to easially get/set
 #       text from text boxes.
 
@@ -54,38 +55,34 @@ class LibraryApp(App):
     # Try opening for reading.
     # If no file exists, then we can make a new one
     filename_users = 'libraryusers.pld'
-    #filename_books = 'librarybooks.pld'
-#    try:
-#        file_books = open(filename_books, 'r')
-#        try:
-#            data_books = pickle.load( file_books )
-#            file_books.close()
-#            print "Loaded Book data file"
-#            print data_books
-#        except EOFError:
-#            data_books = {}
-#            print "Creating Book data"
-#            print data_books
-#    except IOError:
-#        data_books = {}
-#        print "Creating Book data"
-#        print data_books
-    # Now for the user file
+    filename_books = 'librarybooks.pld'
     try:
         file_users = open(filename_users, 'r')
         try:
             data_users = pickle.load( file_users )
             file_users.close()
             print "Loaded user data file"
-            print data_users
         except EOFError:
             data_users = {}
-            print "File found, unable to load, creating new suers"
-            print data_users
+            print "File found, unable to load, creating new users"
     except IOError:
         data_users = {}
-        print "File not found, Creating User data"
-        print data_users
+        print "File not found, creating user data"
+    print data_users
+    # Now for the book file
+    try:
+        file_books = open(filename_books, 'r')
+        try:
+            data_books = pickle.load( file_books )
+            file_books.close()
+            print "Loaded book data file"
+        except EOFError:
+            data_books = {}
+            print "File found, unable to load, creating new books"
+    except IOError:
+        data_books = {}
+        print "File not found, creating book data"
+    print data_books
 
     def build(self):
         # Initalize screen info
@@ -154,29 +151,52 @@ class LibraryApp(App):
                 # Create a new user with the provided values
                 names = self.screens[self.sidx['newuser']].ids.new_name_text.text
                 netid = self.screens[self.sidx['newuser']].ids.new_netid_text.text
-                newuser = user.user(name=names,netid=netid)
+                newuser = user.User(names, netid)
                 self.data_users[netid] = newuser
                 # Re-pickle our data
                 file_users = open(self.filename_users,'w')
                 pickle.dump(self.data_users, file_users)
                 file_users.close()
-                # Reset text and let the user know this worked
-                self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
-                self.screens[self.sidx['newuser']].ids.new_netid_text.text = ''
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
             except:
                 self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Create Failed!'
         else:
+            # Reset text and let the user know this worked
+            self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
+            self.screens[self.sidx['newuser']].ids.new_netid_text.text = ''
             self.go_screen(self.sidx['librarian'],'right')
         return
     def add_book(self,create):
         if create:
-            pass
-            # Create a new user with the provided values
-            # Re-pickle our data
+            try:
+                # Create a new book with the provided values
+                # TODO: Need to do some value checking, eg year
+                title = self.screens[self.sidx['newbook']].ids.newbook_title_text.text
+                author = self.screens[self.sidx['newbook']].ids.newbook_author_text.text
+                year = self.screens[self.sidx['newbook']].ids.newbook_year_text.text
+                copy = self.screens[self.sidx['newbook']].ids.newbook_copy_text.text
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Awaiting RFID Code....'
+                #TODO: get a real RFID code here
+                rfidcode = rfid.get_rfid()
+                self.screens[self.sidx['newbook']].ids.newbook_rfid_text.text = str(rfidcode)
+                newbook = book.Book(title, author, year, copy, rfidcode)
+                self.data_books[rfidcode] = newbook
+                # Re-pickle our data
+                file_books = open(self.filename_books,'w')
+                pickle.dump(self.data_books, file_books)
+                file_books.close()
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Success!'
+            except:
+                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Create Failed!'
         else:
+            # Reset text and let the user know this worked
+            self.screens[self.sidx['newbook']].ids.newbook_title_text.text = ''
+            self.screens[self.sidx['newbook']].ids.newbook_author_text.text = ''
+            self.screens[self.sidx['newbook']].ids.newbook_year_text.text = ''
+            self.screens[self.sidx['newbook']].ids.newbook_copy_text.text = '1'
             self.go_screen(self.sidx['librarian'],'right')
         return
+
     # TODO: May just put these on a screen of their own
     def list_all_users(self):
         pass

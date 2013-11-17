@@ -3,9 +3,13 @@ LibraryScreen:
 
     Label:
         text: 'Welcome to the Physics Library System'
+        height: '16dp'
+        size_hint_y: None
 
     Label:
         text: 'Enter the information below to add a book to the sytem.'
+        height: '16dp'
+        size_hint_y: None
 
     GridLayout:
         cols: 2
@@ -17,41 +21,62 @@ LibraryScreen:
             text: 'Title'
 
         TabTextInput:
-            id: new_title_text
+            id: newbook_title_text
             size_hint_y: None
             height: '32dp'
             text: ''
             focus: True
-            next: new_author_text
+            next: newbook_author_text
 
         Label:
             text: 'Author'
 
         TabTextInput:
-            id: new_author_text
+            id: newbook_author_text
             size_hint_y: None
             height: '32dp'
             text: ''
-            next: new_year_text
+            next: newbook_year_text
 
         Label:
             text: 'Year'
 
         TabTextInput:
-            id: new_year_text
+            id: newbook_year_text
             size_hint_y: None
             height: '32dp'
             text: ''
+            next: newbook_copy_text
+
+        Label:
+            text: 'Copy'
+
+        TabTextInput:
+            id: newbook_copy_text
+            size_hint_y: None
+            height: '32dp'
+            text: '1'
+            next: newbook_title_text
+
+        Label:
+            text: 'Status:'
+
+        TextInput:
+            id: newbook_status_text
+            readonly: True
+            size_hint_y: None
+            height: '32dp'
+            text: 'Pending...'
 
         Label:
             text: 'RFID Code'
 
-        Button:
-            id: new_rfid_button
+        TextInput:
+            id: newbook_rfid_text
+            readonly: True
             size_hint_y: None
-            height: '48dp'
-            text: 'Scan for RFID Code'
-            on_release: app.add_book_code()
+            height: '32dp'
+            text: "Awaiting 'Create'..."
 
     Button:
         id: create_button

@@ -1,6 +1,6 @@
 # The user data type and associated methods
 
-class user():
+class User():
     def __init__(self, name, netid):
         self.name = name
         self.netid = netid

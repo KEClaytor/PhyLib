@@ -1,10 +1,15 @@
 # Class for storing book information
 
 class Book():
-    def __init__(self, title, author):
+    def __init__(self, title, author, year, copy, rfid):
         self.title = title
         self.author = author
-        self.book_id = 0
+        self.year = year
+        self.copy = copy
+        self.rfid = rfid
+        # status 1 = in library
+        #        0 = checked out
+        self.status = 1
         return
 
     # Get book information
@@ -12,12 +17,14 @@ class Book():
         return self.title
     def get_author(self):
         return self.author
-    def get_book_id(self):
-        return self.book_id
+    def get_year(self):
+        return self.year
+    def get_rfid(self):
+        return self.rfid
 
     # Reset the book ID
     # (in the case of a tag change)
-    def change_id(self, new_id):
-        self.book_id = new_id
+    def change_id(self, new_rfid):
+        self.rfid = new_rfid
         return
 
