@@ -108,7 +108,7 @@ class LibraryApp(App):
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
         return
-    # Should allow for easier / clearer get/set from textboxes
+    # Should allow for easier/clearer get/set from textboxes
     #   elem_name is the kivy id, eg. 'newbook_title_text'
     #   and field_name is what you want, eg; 'text'
     # This allows it to be somewhat more general too
@@ -170,50 +170,49 @@ class LibraryApp(App):
                 file_users.close()
                 self.set_kvattr('newuser','newuser_status_text','text','Success!')
                 self.set_kvattr('newuser','newuser_status_text','background_color',[0,1,0,1])
-                #self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Success!'
-                #self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [0,1,0,1]
             except:
-                self.screens[self.sidx['newuser']].ids.newuser_status_text.text = 'Create Failed!'
-                self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,0,0,1]
+                self.set_kvattr('newuser','newuser_status_text','text','Create Failed!')
+                self.set_kvattr('newuser','newuser_status_text','background_color',[1,0,0,1])
         else:
             # Reset text and let the user know this worked
-            self.screens[self.sidx['newuser']].ids.new_name_text.text = ''
-            self.screens[self.sidx['newuser']].ids.new_netid_text.text = ''
+            self.set_kvattr('newuser','newuser_name_text','text','')
+            self.set_kvattr('newuser','newuser_netid_text','text','')
             self.go_screen('librarian')
         return
     def add_book(self,create):
         # Set background color on status back to white
-        self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,1,1,1]
+        self.set_kvattr('newbook','newbook_status_text','background_color',[1,1,1,1])
         if create:
             try:
                 # Create a new book with the provided values
                 # TODO: Need to do some value checking, eg year
-                title = self.screens[self.sidx['newbook']].ids.newbook_title_text.text
-                author = self.screens[self.sidx['newbook']].ids.newbook_author_text.text
-                year = self.screens[self.sidx['newbook']].ids.newbook_year_text.text
-                copy = self.screens[self.sidx['newbook']].ids.newbook_copy_text.text
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Awaiting RFID Code....'
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,0.7,0,1]
+                title = self.get_kvattr('newbook','newbook_title_text','text')
+                author = self.get_kvattr('newbook','newbook_author_text','text')
+                year = self.get_kvattr('newbook','newbook_year_text','text')
+                copy = self.get_kvattr('newbook','newbook_copy_text','text')
+                self.set_kvattr('newbook','newbook_status_text','text','Awaiting RFID Code....')
+                self.set_kvattr['newbook','newbook_status_text','background_color',[1,0.7,0,1])
                 #TODO: get a real RFID code here
                 rfidcode = rfid.get_rfid()
-                self.screens[self.sidx['newbook']].ids.newbook_rfid_text.text = str(rfidcode)
+                self.set_kvattr('newbook','newbook_rfid_text','text',str(rfidcode))
+                # Now add the book to our list
                 newbook = book.Book(title, author, year, copy, rfidcode)
                 self.data_books[rfidcode] = newbook
                 # Re-pickle our data
                 file_books = open(self.filename_books,'w')
                 pickle.dump(self.data_books, file_books)
                 file_books.close()
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Success!'
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [0,1,0,1]
+                self.set_kvattr('newbook','newbook_status_text','text','Success!')
+                self.set_kvattr['newbook','newbook_status_text','background_color',[0,1,0,1])
             except:
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.text = 'Create Failed!'
-                self.screens[self.sidx['newbook']].ids.newbook_status_text.background_color = [1,0,0,1]
+                self.set_kvattr('newbook','newbook_status_text','text','Create Failed!')
+                self.set_kvattr['newbook','newbook_status_text','background_color',[1,0,0,1])
         else:
             # Reset text and let the user know this worked
-            self.screens[self.sidx['newbook']].ids.newbook_title_text.text = ''
-            self.screens[self.sidx['newbook']].ids.newbook_author_text.text = ''
-            self.screens[self.sidx['newbook']].ids.newbook_year_text.text = ''
-            self.screens[self.sidx['newbook']].ids.newbook_copy_text.text = '1'
+            self.set_kvattr('newbook','newbook_title_text','text','')
+            self.set_kvattr('newbook','newbook_author_text','text','')
+            self.set_kvattr('newbook','newbook_year_text','text','')
+            self.set_kvattr('newbook','newbook_copy_text','text','1')
             self.go_screen('librarian')
         return
 

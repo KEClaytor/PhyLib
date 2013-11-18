@@ -59,16 +59,6 @@ LibraryScreen:
             next: newbook_title_text
 
         Label:
-            text: 'Status:'
-
-        TextInput:
-            id: newbook_status_text
-            readonly: True
-            size_hint_y: None
-            height: '32dp'
-            text: 'Pending...'
-
-        Label:
             text: 'RFID Code'
 
         TextInput:
@@ -77,6 +67,16 @@ LibraryScreen:
             size_hint_y: None
             height: '32dp'
             text: "Awaiting 'Create'..."
+
+        Label:
+            text: 'Status:'
+
+        TextInput:
+            id: newbook_status_text
+            readonly: True
+            size_hint_y: None
+            height: '32dp'
+            text: 'Pending...'
 
     Button:
         id: create_button
