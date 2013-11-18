@@ -39,12 +39,22 @@ LibraryScreen:
                 on_release: app.go_screen('newbook')
 
             Label:
-                size_hint_y: .3
+                size_hint_y: .1
                 text: ''
 
             Label:
                 size_hint_y: .1
                 text: 'User options:'
+
+            Button:
+                size_hint_y: .1
+                text: 'Checkout'
+                on_release: app.checkout()
+
+            Button:
+                size_hint_y: .1
+                text: 'Checkin'
+                on_release: app.checkin()
 
             Button:
                 size_hint_y: .1

@@ -1,10 +1,10 @@
 LibraryScreen:
-	name: 'librarian'
+	name: 'user'
     fullscreen: True
 
     BoxLayout:
         orientation: 'horizontal'
-        size_hint_y: 1
+        size_hint_y: .3
 
         BoxLayout:
             orientation: 'vertical'
@@ -21,12 +21,22 @@ LibraryScreen:
             orientation: 'vertical'
 
             Label:
-                size_hint_y: .7
+                size_hint_y: .5
                 text: ''
 
             Label:
                 size_hint_y: .1
                 text: 'User options:'
+
+            Button:
+                size_hint_y: .1
+                text: 'Checkout'
+                on_release: app.checkout()
+
+            Button:
+                size_hint_y: .1
+                text: 'Checkin'
+                on_release: app.checkin()
 
             Button:
                 size_hint_y: .1

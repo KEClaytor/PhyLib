@@ -1,63 +1,69 @@
 LibraryScreen:
-    name: 'mainlogin'
+    name: 'newuser'
 
-    Label:
-        text: 'Welcome to the Physics Library System'
-        size_hint_y: None
-        height: '16dp'
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: (1, 1)
 
-    Label:
-        text: "I'll need a little bit of data to get going"
-        size_hint_y: None
-        height: '16dp'
+        BoxLayout:
+            size_hint: (.6, 1)
+            orientation: 'vertical'
 
-    GridLayout:
-        cols: 2
-        spacing: '8dp'
-        size_hint_y: None
-        height: self.minimum_height
+            ScrollView:
+                size_hint: (1,None)
+                id: newuser_list_sv
 
-        Label:
-            text: 'Name'
+        BoxLayout:
+            size_hint: (.4, 1)
+            orientation: 'vertical'
 
-        TabTextInput:
-            id: newuser_name_text
-            size_hint_y: None
-            height: '32dp'
-            text: ''
-            focus: True
-            next: newuser_netid_text
+            GridLayout:
+                cols: 2
+                spacing: '8dp'
+                size_hint_y: None
+                height: self.minimum_height
 
-        Label:
-            text: 'NetID'
+                Label:
+                    text: 'Name'
 
-        TabTextInput:
-            id: newuser_netid_text
-            size_hint_y: None
-            height: '32dp'
-            text: ''
-            next: newuser_name_text
+                TabTextInput:
+                    id: newuser_name_text
+                    size_hint_y: None
+                    height: '32dp'
+                    text: ''
+                    focus: True
+                    next: newuser_netid_text
 
-        Label:
-            text: 'Status:'
+                Label:
+                    text: 'NetID'
 
-        TextInput:
-            id: newuser_status_text
-            readonly: True
-            size_hint_y: None
-            height: '32dp'
-            text: 'Pending...'
+                TabTextInput:
+                    id: newuser_netid_text
+                    size_hint_y: None
+                    height: '32dp'
+                    text: ''
+                    next: newuser_name_text
 
-    Button:
-        id: create_button
-        size_hint_y: None
-        height: '48dp'
-        text: 'Create User'
-        on_release: app.add_user(True)
+                Label:
+                    text: 'Status:'
 
-    Button:
-        id: cancel_button
-        size_hint_y: None
-        height: '48dp'
-        text: 'Cancel and Return'
-        on_release: app.add_user(False)
+                TextInput:
+                    id: newuser_status_text
+                    readonly: True
+                    size_hint_y: None
+                    height: '32dp'
+                    text: 'Pending...'
+
+            Button:
+                id: create_button
+                size_hint_y: None
+                height: '48dp'
+                text: 'Create User'
+                on_release: app.add_user(True)
+
+            Button:
+                id: cancel_button
+                size_hint_y: None
+                height: '48dp'
+                text: 'Cancel and Return'
+                on_release: app.add_user(False)

@@ -8,6 +8,11 @@ from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.uix.screenmanager import Screen
 from kivy.core.window import Window
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
 # For the custom textinput class
 from kivy.uix.textinput import TextInput
 # Library needed modules
@@ -50,7 +55,7 @@ class LibraryApp(App):
     current_title = StringProperty()
     time = NumericProperty(0)
 
-    # Try opening for reading.
+    # Locate and open our users file and our books file
     # If no file exists, then we can make a new one
     filename_users = 'libraryusers.pld'
     filename_books = 'librarybooks.pld'
@@ -96,6 +101,28 @@ class LibraryApp(App):
         self.go_screen('login')
         return
 
+    # Element get/set routines
+    # Should allow for easier/clearer get/set from textboxes
+    #   elem_name is the kivy id, eg. 'newbook_title_text'
+    #   and field_name is what you want, eg; 'text'
+    # This allows it to be somewhat more general too
+    def get_kvattr(self, screen_name, elem_name, field_name):
+        ids = self.screens[self.sidx[screen_name]].ids
+        return getattr( getattr(ids, elem_name), field_name )
+    def set_kvattr(self, screen_name, elem_name, field_name, new_data):
+        ids = self.screens[self.sidx[screen_name]].ids
+        setattr( getattr(ids,elem_name), field_name, new_data )
+        return
+
+    # Screen loading
+    def load_screen(self, index):
+        if index in self.screens:
+            return self.screens[index]
+        screen = Builder.load_file(self.available_screens[index])
+        self.screens[index] = screen
+        return screen
+
+    # Transitions between screens
     def go_screen(self,screen_name):
         old_idx = self.index
         self.index = self.sidx[screen_name]
@@ -107,26 +134,40 @@ class LibraryApp(App):
             direction = 'right'
         sm.switch_to(screen, direction=direction)
         self.current_title = screen.name
-        return
-    # Should allow for easier/clearer get/set from textboxes
-    #   elem_name is the kivy id, eg. 'newbook_title_text'
-    #   and field_name is what you want, eg; 'text'
-    # This allows it to be somewhat more general too
-    def get_kvattr(self, screen_name, elem_name, field_name):
-        ids = self.screens[self.sidx[screen_name]].ids
-        return getattr( getattr(ids, elem_name), field_name )
-    def set_kvattr(self, screen_name, elem_name, field_name, new_data):
-        ids = self.screens[self.sidx[screen_name]].ids
-        setattr( getattr( getattr(ids,elem_name), field_name), new_data )
+        # Check to see if we need to update any layouts on this screen
+        # eg. put down a list of books / users
+        self.update_layout(screen_name)
         return
 
-    def load_screen(self, index):
-        if index in self.screens:
-            return self.screens[index]
-        screen = Builder.load_file(self.available_screens[index])
-        self.screens[index] = screen
-        return screen
+    def update_layout(self, sn):
+        # TODO: Figure out why this isn't loading with 
+        #   the correct height. Eg. scrollview is too short
+        ids = self.screens[self.sidx[sn]].ids
+        if (sn == 'newuser'):
+            content = ids.newuser_list_sv
+            # Delete any old children from the scroll view
+            layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+            layout.bind(minimum_height=layout.setter('height'))
+            for user in self.data_users:
+                ud = self.data_users[user]
+                sublayout = GridLayout(cols=2, size_hint_y=None)
+                userlayout = BoxLayout(orientation='vertical')
+                userlayout.add_widget( Label(text=ud.name) )
+                userlayout.add_widget( Label(text=ud.netid) )
+                sublayout.add_widget(userlayout)
+                sublayout.add_widget( Button(text='Del',size_hint=(.25,1)))
+                layout.add_widget(sublayout)
 
+            content.add_widget(layout)
+        elif (sn == 'user'):
+            pass
+        else: #All other screen names
+            pass
+        return
+
+    # ==============================================
+    # ================Callbacks=====================
+    # ==============================================
     def login(self):
         # Get the text box contents and pass them to
         #    our authentication agent.
@@ -149,13 +190,31 @@ class LibraryApp(App):
         # Return us to the login screen
         self.go_screen('login')
         # Clear username and password
-        self.screens[self.sidx['login']].ids.username_text.text = ''
-        self.screens[self.sidx['login']].ids.password_text.text = ''
+        self.set_kvattr('login', 'username_text', 'text', '')
+        self.set_kvattr('login', 'password_text', 'text', '')
+        return
+
+    # Checkin / out of books
+    def checkout(self):
+        # Get the toggle state of the buton.
+        # If we are off, then turn on and start looking for books
+        # Also modify the checkin toggle state
+        pass
+    # Same but for checking books in
+    def checkin(self):
+        pass
+
+    # List users/books in the layout specified
+    def load_content(self, layout):
+        # Create the gridlayout
+        for but in range(20):
+            layout.add_widget(Button(
+                                text=str(but)))
+        # Attach the grid view to the layout
         return
 
     # Librarian screens, creating users and books
-    def add_user(self,create):
-        #self.screens[self.sidx['newuser']].ids.newuser_status_text.background_color = [1,1,1,1]
+    def add_user(self, create):
         self.set_kvattr('newuser','newuser_status_text','background_color',[1,1,1,1])
         if create:
             try:
@@ -171,6 +230,7 @@ class LibraryApp(App):
                 self.set_kvattr('newuser','newuser_status_text','text','Success!')
                 self.set_kvattr('newuser','newuser_status_text','background_color',[0,1,0,1])
             except:
+                # TODO: Log this in an error system
                 self.set_kvattr('newuser','newuser_status_text','text','Create Failed!')
                 self.set_kvattr('newuser','newuser_status_text','background_color',[1,0,0,1])
         else:
@@ -179,19 +239,20 @@ class LibraryApp(App):
             self.set_kvattr('newuser','newuser_netid_text','text','')
             self.go_screen('librarian')
         return
+
     def add_book(self,create):
         # Set background color on status back to white
         self.set_kvattr('newbook','newbook_status_text','background_color',[1,1,1,1])
         if create:
             try:
                 # Create a new book with the provided values
-                # TODO: Need to do some value checking, eg year
+                # TODO: Need to do some value checking, eg year, copy
                 title = self.get_kvattr('newbook','newbook_title_text','text')
                 author = self.get_kvattr('newbook','newbook_author_text','text')
                 year = self.get_kvattr('newbook','newbook_year_text','text')
                 copy = self.get_kvattr('newbook','newbook_copy_text','text')
                 self.set_kvattr('newbook','newbook_status_text','text','Awaiting RFID Code....')
-                self.set_kvattr['newbook','newbook_status_text','background_color',[1,0.7,0,1])
+                self.set_kvattr('newbook','newbook_status_text','background_color',[1,0.7,0,1])
                 #TODO: get a real RFID code here
                 rfidcode = rfid.get_rfid()
                 self.set_kvattr('newbook','newbook_rfid_text','text',str(rfidcode))
@@ -203,10 +264,11 @@ class LibraryApp(App):
                 pickle.dump(self.data_books, file_books)
                 file_books.close()
                 self.set_kvattr('newbook','newbook_status_text','text','Success!')
-                self.set_kvattr['newbook','newbook_status_text','background_color',[0,1,0,1])
+                self.set_kvattr('newbook','newbook_status_text','background_color',[0,1,0,1])
             except:
+                # TODO: Log this in an error system
                 self.set_kvattr('newbook','newbook_status_text','text','Create Failed!')
-                self.set_kvattr['newbook','newbook_status_text','background_color',[1,0,0,1])
+                self.set_kvattr('newbook','newbook_status_text','background_color',[1,0,0,1])
         else:
             # Reset text and let the user know this worked
             self.set_kvattr('newbook','newbook_title_text','text','')
