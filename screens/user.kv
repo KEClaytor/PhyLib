@@ -13,9 +13,22 @@ LibraryScreen:
                 size_hint_y: .1
                 text: 'User: Items currently checked out:'
 
-            Label:
-                size_hint_y: .9
-                text: 'No items currently checked out.'
+            ScrollView:
+                id: user_list_sv
+                size_hint: (1,.9)
+
+            BoxLayout:
+                orientation: 'horizontal'
+
+                Label:
+                    text: 'Status:'
+
+                TextInput:
+                    id: user_status_text
+                    readonly: True
+                    size_hint_y: None
+                    height: '32dp'
+                    text: 'Nothing to report.'
 
         BoxLayout:
             orientation: 'vertical'
@@ -29,11 +42,13 @@ LibraryScreen:
                 text: 'User options:'
 
             Button:
+                id: user_checkout
                 size_hint_y: .1
                 text: 'Checkout'
                 on_release: app.checkout()
 
             Button:
+                id: user_checkin
                 size_hint_y: .1
                 text: 'Checkin'
                 on_release: app.checkin()

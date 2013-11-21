@@ -21,6 +21,51 @@ import user
 import book
 import rfid
 
+def read_library_data(data_filenames):
+    # Locate and open our users file and our books file
+    # If no file exists, then we can make a new one
+    filename_users = data_filenames[0]
+    filename_books = data_filenames[1]
+    try:
+        file_users = open(filename_users, 'r')
+        try:
+            data_users = pickle.load( file_users )
+            file_users.close()
+            print "Loaded user data file"
+        except EOFError:
+            data_users = {}
+            print "File found, unable to load, creating new users"
+    except IOError:
+        data_users = {}
+        print "File not found, creating user data"
+    print data_users
+    # Now for the book file
+    try:
+        file_books = open(filename_books, 'r')
+        try:
+            data_books = pickle.load( file_books )
+            file_books.close()
+            print "Loaded book data file"
+        except EOFError:
+            data_books = {}
+            print "File found, unable to load, creating new books"
+    except IOError:
+        data_books = {}
+        print "File not found, creating book data"
+    print data_books
+    return (data_users,data_books)
+
+def write_library_data(data_users, data_books, data_filenames):
+    filename_users = data_filenames[0]
+    filename_books = data_filenames[1]
+    file_users = open(filename_users,'w')
+    pickle.dump(data_users, file_users)
+    file_users.close()
+    file_books = open(filename_books,'w')
+    pickle.dump(data_books, file_books)
+    file_books.close()
+    return
+        
 class LibraryScreen(Screen):
     # TODO: When done make this fullscreen
     # TODO: Remap escape to go back a screen
@@ -54,51 +99,28 @@ class LibraryApp(App):
     index = NumericProperty(-1)
     current_title = StringProperty()
     time = NumericProperty(0)
-
-    # Locate and open our users file and our books file
-    # If no file exists, then we can make a new one
-    filename_users = 'libraryusers.pld'
-    filename_books = 'librarybooks.pld'
-    try:
-        file_users = open(filename_users, 'r')
-        try:
-            data_users = pickle.load( file_users )
-            file_users.close()
-            print "Loaded user data file"
-        except EOFError:
-            data_users = {}
-            print "File found, unable to load, creating new users"
-    except IOError:
-        data_users = {}
-        print "File not found, creating user data"
-    print data_users
-    # Now for the book file
-    try:
-        file_books = open(filename_books, 'r')
-        try:
-            data_books = pickle.load( file_books )
-            file_books.close()
-            print "Loaded book data file"
-        except EOFError:
-            data_books = {}
-            print "File found, unable to load, creating new books"
-    except IOError:
-        data_books = {}
-        print "File not found, creating book data"
-    print data_books
+    current_user = StringProperty()
+    data_users = {}
+    data_books = {}
+    data_filenames = ['libraryusers.pld','librarybooks.pld']
+    failed_login_attempts = 0
 
     def build(self):
         # Initalize screen info
         Clock.schedule_interval(self._update_clock, 1 / 60.)
         self.screens = {}
+        # These correspond to the kivy screen files
         self.available_screens = ['login', 'user',
             'librarian', 'newuser', 'newbook']
+        # Allows us to refer to screen by name instead of number
         self.sidx = {'login':0, 'user':1,
             'librarian':2, 'newuser':3, 'newbook':4}
         curdir = dirname(__file__)
         self.available_screens = [join(curdir, 'screens',
             '{}.kv'.format(fn)) for fn in self.available_screens]
         self.go_screen('login')
+        # Get the user data
+        (self.data_users, self.data_books) = read_library_data(self.data_filenames)
         return
 
     # Element get/set routines
@@ -142,9 +164,12 @@ class LibraryApp(App):
     def update_layout(self, sn):
         # TODO: Figure out why this isn't loading with 
         #   the correct height. Eg. scrollview is too short
+        # TODO: Delete the old scrollview child on entering.
+        #   we can only have one active at a time.
         ids = self.screens[self.sidx[sn]].ids
         if (sn == 'newuser'):
             content = ids.newuser_list_sv
+            content.clear_widgets()
             # Delete any old children from the scroll view
             layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
             layout.bind(minimum_height=layout.setter('height'))
@@ -156,11 +181,31 @@ class LibraryApp(App):
                 userlayout.add_widget( Label(text=ud.netid) )
                 sublayout.add_widget(userlayout)
                 sublayout.add_widget( Button(text='Del',size_hint=(.25,1)))
+                #TODO: Add a promote and remove librarian option
                 layout.add_widget(sublayout)
-
+            # Finally add to the screen
             content.add_widget(layout)
         elif (sn == 'user'):
-            pass
+            content = ids.user_list_sv
+            content.clear_widgets()
+            layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+            layout.bind(minimum_height=layout.setter('height'))
+            # Get the user checkedout books and display them
+            ud = self.data_users[self.current_user]
+            for book_id in ud.books:
+                book = data_books[book_id]
+                sublayout = GridLayout(cols=2, size_hint_y=None)
+                sublayout.add_widget( Label(text="Title: ") )
+                sublayout.add_widget( Label(text=book.title) )
+                sublayout.add_widget( Label(text="Author: ") )
+                sublayout.add_widget( Label(text=book.author) )
+                sublayout.add_widget( Label(text="Year: ") )
+                sublayout.add_widget( Label(text=book.year) )
+                sublayout.add_widget( Label(text="Copy #: ") )
+                sublayout.add_widget( Label(text=book.copy) )
+                layout.add_widget(sublayout)
+            # Finally add to the screen
+            content.add_widget(layout)
         else: #All other screen names
             pass
         return
@@ -169,21 +214,39 @@ class LibraryApp(App):
     # ================Callbacks=====================
     # ==============================================
     def login(self):
+        # Okay, the one easter egg I'm putting in
+        failed_login_str = ["You're not a recognized user",
+                            "Try again, k thx",
+                            "You're pretty bad at this, hunh?",
+                            "Are you supposed to be here?",
+                            "I'm calling the cops next time",
+                            "That's it! Really! This is it!",
+                            "...",
+                            "Well that didn't work",
+                            "Maybe you can find the librarian?",
+                            "I can't help you anymore, but a librarian could."]
         # Get the text box contents and pass them to
         #    our authentication agent.
         # Check to see if the user is a librarian
         # If they are then give them that screen
         username = self.get_kvattr('login', 'username_text', 'text')
         password = self.get_kvattr('login', 'password_text', 'text')
+        self.current_user = username
         # TODO: Get user info
         #lib = self.get_login_info(username)
         lib = 0
         if (username == 'kec30'):
             lib = 1
-        if (lib):
-            self.go_screen('librarian')
+        if (username in self.data_users) or (username == 'kec30'):
+            if (lib):
+                self.go_screen('librarian')
+            else:
+                self.go_screen('user')
+            self.failed_login_attempts = 0
         else:
-            self.go_screen('user')
+            self.set_kvattr('login', 'username_text', 'text', failed_login_str[self.failed_login_attempts % len(failed_login_str)])
+            self.set_kvattr('login', 'password_text', 'text', "")
+            self.failed_login_attempts += 1
         return
 
     def logout(self):
@@ -192,6 +255,7 @@ class LibraryApp(App):
         # Clear username and password
         self.set_kvattr('login', 'username_text', 'text', '')
         self.set_kvattr('login', 'password_text', 'text', '')
+        self.current_user = ''
         return
 
     # Checkin / out of books
@@ -199,9 +263,38 @@ class LibraryApp(App):
         # Get the toggle state of the buton.
         # If we are off, then turn on and start looking for books
         # Also modify the checkin toggle state
+        # Wait for a little while and then loop, this way we can catch UI updates
+        # Unfortunately, we have to do this for user and librarian screens
+        self.set_kvattr('user', 'user_checkin', 'state', 'normal')
+        self.set_kvattr('user', 'user_checkout', 'state', 'down')
+        #self.set_kvattr('librarian', 'librarian_checkout', 'state', 'down')
+        user = self.data_users[self.current_user]
+        while 1:
+            # Get a book id
+            book_id = rfid.get_rfid()
+            # Make sure it isn't already checkedout
+            if book_id in self.data_books:
+                book = self.data_books[book_id]
+                if book.status:
+                    # Check the book out to this user
+                    user.checkout(book_id)
+                    book.checkout()
+                    # Update the user screen
+                    self.set_kvattr('user','user_status_text','text','Checkout successful!')
+                    self.set_kvattr('user','user_status_text','background_color',[0,1,0,1])
+                    # Pickle book and user data in case of a crash
+                    write_library_data(self.data_users, self.data_books, self.data_filenames)
+                else:
+                    self.set_kvattr('user','user_status_text','text','Book already checked out.')
+                    self.set_kvattr('user','user_status_text','background_color',[1,0,0,1])
+            else:
+                self.set_kvattr('user','user_status_text','text','Book not in system!')
+                self.set_kvattr('user','user_status_text','background_color',[1,0,0,1])
         pass
     # Same but for checking books in
     def checkin(self):
+        self.set_kvattr('user', 'user_checkout', 'state', 'up')
+        self.set_kvattr('user', 'user_checkin', 'state', 'down')
         pass
 
     # List users/books in the layout specified
@@ -223,10 +316,7 @@ class LibraryApp(App):
                 netid = self.get_kvattr('newuser','newuser_netid_text','text')
                 newuser = user.User(names, netid)
                 self.data_users[netid] = newuser
-                # Re-pickle our data
-                file_users = open(self.filename_users,'w')
-                pickle.dump(self.data_users, file_users)
-                file_users.close()
+                write_library_data(self.data_users, self.data_books, self.data_filenames)
                 self.set_kvattr('newuser','newuser_status_text','text','Success!')
                 self.set_kvattr('newuser','newuser_status_text','background_color',[0,1,0,1])
             except:
@@ -238,11 +328,13 @@ class LibraryApp(App):
             self.set_kvattr('newuser','newuser_name_text','text','')
             self.set_kvattr('newuser','newuser_netid_text','text','')
             self.go_screen('librarian')
+        self.update_layout('librarian')
         return
 
     def add_book(self,create):
         # Set background color on status back to white
         self.set_kvattr('newbook','newbook_status_text','background_color',[1,1,1,1])
+        rfidcode = -99
         if create:
             try:
                 # Create a new book with the provided values
@@ -251,23 +343,41 @@ class LibraryApp(App):
                 author = self.get_kvattr('newbook','newbook_author_text','text')
                 year = self.get_kvattr('newbook','newbook_year_text','text')
                 copy = self.get_kvattr('newbook','newbook_copy_text','text')
-                self.set_kvattr('newbook','newbook_status_text','text','Awaiting RFID Code....')
-                self.set_kvattr('newbook','newbook_status_text','background_color',[1,0.7,0,1])
+            except:
+                # TODO: Log this in an error system
+                self.set_kvattr('newbook','newbook_status_text','text','No book info!')
+                self.set_kvattr('newbook','newbook_status_text','background_color',[1,0,0,1])
+            self.set_kvattr('newbook','newbook_status_text','text','Awaiting RFID Code....')
+            self.set_kvattr('newbook','newbook_status_text','background_color',[1,0.7,0,1])
+            try:
                 #TODO: get a real RFID code here
                 rfidcode = rfid.get_rfid()
+                print rfidcode
                 self.set_kvattr('newbook','newbook_rfid_text','text',str(rfidcode))
+                while rfidcode in self.data_books:
+                    self.set_kvattr('newbook','newbook_status_text','text','RFID Code in use!')
+                    self.set_kvattr('newbook','newbook_status_text','background_color',[1,0,0,1])
+                    rfidcode = rfid.get_rfid()
+                    self.set_kvattr('newbook','newbook_rfid_text','text',str(rfidcode))
+            except:
+                # TODO: Log this in an error system
+                self.set_kvattr('newbook','newbook_status_text','text','Bad RFID Read!')
+                self.set_kvattr('newbook','newbook_status_text','background_color',[1,0,0,1])
+            try:
                 # Now add the book to our list
+                print title, author, year, copy, rfidcode
                 newbook = book.Book(title, author, year, copy, rfidcode)
+                print newbook
                 self.data_books[rfidcode] = newbook
-                # Re-pickle our data
-                file_books = open(self.filename_books,'w')
-                pickle.dump(self.data_books, file_books)
-                file_books.close()
+            except:
+                print "could not add data"
+            try:
+                write_library_data(self.data_users, self.data_books, self.data_filenames)
                 self.set_kvattr('newbook','newbook_status_text','text','Success!')
                 self.set_kvattr('newbook','newbook_status_text','background_color',[0,1,0,1])
             except:
                 # TODO: Log this in an error system
-                self.set_kvattr('newbook','newbook_status_text','text','Create Failed!')
+                self.set_kvattr('newbook','newbook_status_text','text',"Can't save book data!")
                 self.set_kvattr('newbook','newbook_status_text','background_color',[1,0,0,1])
         else:
             # Reset text and let the user know this worked
@@ -275,14 +385,9 @@ class LibraryApp(App):
             self.set_kvattr('newbook','newbook_author_text','text','')
             self.set_kvattr('newbook','newbook_year_text','text','')
             self.set_kvattr('newbook','newbook_copy_text','text','1')
+            self.set_kvattr('newbook','newbook_rfid_text','text','')
             self.go_screen('librarian')
         return
-
-    # TODO: May just put these on a screen of their own
-    def list_all_users(self):
-        pass
-    def list_all_books(self):
-        pass
 
     def _update_clock(self, dt):
         self.time = time()

@@ -1,4 +1,5 @@
 # The user data type and associated methods
+from datetime import datetime
 
 class User():
     def __init__(self, name, netid):
@@ -26,12 +27,12 @@ class User():
         self.librarian = 1
         return
     def remove_librarian(self):
-        self.librarian = 1
+        self.librarian = 0
         return
 
     # Checking out and in books
     def checkout(self, book_id):
-        self.books.append(book)
+        self.books.append(book_id)
         self.times.append(datetime.now)
         return
 

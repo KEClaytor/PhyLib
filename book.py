@@ -22,6 +22,13 @@ class Book():
     def get_rfid(self):
         return self.rfid
 
+    def checkout(self):
+        self.status = 0
+        return
+    def checkin(self):
+        self.status = 1
+        return
+
     # Reset the book ID
     # (in the case of a tag change)
     def change_id(self, new_rfid):
